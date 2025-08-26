@@ -1,12 +1,12 @@
-
+// db.js
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Crear base de datos en memoria (o archivo)
-const db = new sqlite3.Database(':memory:'); // Para desarrollo rápido
-// O usar archivo: const db = new sqlite3.Database('./pokedex.db');
+// 👇 CAMBIA ESTA LÍNEA - Usa un archivo físico en lugar de memoria
+const dbPath = path.join(__dirname, 'pokedex.db'); // Archivo en el mismo directorio
+const db = new sqlite3.Database(dbPath); // <- Base de datos PERSISTENTE
 
-console.log('✅ Conectado a SQLite (sin configuración!)');
+console.log(`✅ Conectado a SQLite en: ${dbPath}`);
 
 // Función para hacer queries simples
 const query = (sql, params = []) => {
@@ -28,4 +28,17 @@ const run = (sql, params = []) => {
   });
 };
 
-module.exports = { db, query, run };
+// 👇 Exporta una función para cerrar la conexión cuando termines
+function closeDB() {
+  return new Promise((resolve, reject) => {
+    db.close((err) => {
+      if (err) reject(err);
+      else {
+        console.log('✅ Conexión a la base de datos cerrada');
+        resolve();
+      }
+    });
+  });
+}
+
+module.exports = { db, query, run, closeDB }; // <- Exporta closeDB
